@@ -49,11 +49,11 @@ scripts.
 
 ``` bash
 # wrong
-name='dave';
+name = 'dave';
 echo "hello $name";
 
 #right
-name='dave'
+name = 'dave'
 echo "hello $name"
 ```
 
@@ -68,12 +68,12 @@ be made local.
 ``` bash
 # wrong
 function foo {
-    i=foo # this is now global, wrong depending on intent
+	i = foo # this is now global, wrong depending on intent
 }
 
 # right
 foo() {
-    local i=foo # this is local, preferred
+	local i = foo # this is local, preferred
 }
 ```
 
@@ -86,17 +86,17 @@ as `while`.
 # wrong
 if true
 then
-    ...
+...
 fi
 
 # also wrong, though admittedly looks kinda cool
 true && {
-    ...
+	...
 }
 
 # right
 if true; then
-    ...
+...
 fi
 ```
 
@@ -125,10 +125,10 @@ Use `[[ ... ]]` for conditional testing, not `[ .. ]` or `test ...`
 test -d /etc
 
 # also wrong
-[ -d /etc ]
+[-d /etc]
 
 # correct
-[[ -d /etc ]]
+[[-d /etc]]
 ```
 
 See http://mywiki.wooledge.org/BashFAQ/031 for more information
@@ -138,26 +138,28 @@ See http://mywiki.wooledge.org/BashFAQ/031 for more information
 Use bash builtins for generating sequences
 
 ``` bash
-n=10
+n = 10
 
 # wrong
 for f in $(seq 1 5); do
-    ...
+...
 done
 
 # wrong
 for f in $(seq 1 "$n"); do
-    ...
+...
 done
 
 # right
-for f in {1..5}; do
-    ...
+for f in {
+	1..5
+}; do
+...
 done
 
 # right
 for ((i = 0; i < n; i++)); do
-    ...
+...
 done
 ```
 
@@ -167,7 +169,7 @@ Use `$(...)` for command substitution.
 
 ``` bash
 foo=`date`  # wrong
-foo=$(date) # right
+foo = $(date) # right
 ```
 
 ### Math / Integer Manipulation
@@ -175,17 +177,17 @@ foo=$(date) # right
 Use `((...))` and `$((...))`.
 
 ``` bash
-a=5
-b=4
+a = 5
+b = 4
 
 # wrong
-if [[ $a -gt $b ]]; then
-    ...
+if [[$a -gt $b]]; then
+...
 fi
 
 # right
 if ((a > b)); then
-    ...
+...
 fi
 ```
 
@@ -198,15 +200,19 @@ expansion](http://mywiki.wooledge.org/BashGuide/Parameters#Parameter_Expansion)
 over external commands like `echo`, `sed`, `awk`, etc.
 
 ``` bash
-name='bahamas10'
+name = 'bahamas10'
 
 # wrong
-prog=$(basename "$0")
-nonumbers=$(echo "$name" | sed -e 's/[0-9]//g')
+prog = $(basename "$0")
+nonumbers = $(echo "$name" | sed -e 's/[0-9]//g')
 
 # right
-prog=${0##*/}
-nonumbers=${name//[0-9]/}
+prog = $ {
+	0##*/
+}
+nonumbers = $ {
+	name//[0-9]/
+}
 ```
 
 ### Listing Files
@@ -217,12 +223,12 @@ bash builtin functions to loop files
 ``` bash
 # very wrong, potentially unsafe
 for f in $(ls); do
-    ...
+...
 done
 
 # right
 for f in *; do
-    ...
+...
 done
 ```
 
@@ -244,22 +250,24 @@ etc.) whenever possible
 
 ``` bash
 # wrong
-modules='json httpserver jshint'
+modules = 'json httpserver jshint'
 for module in $modules; do
-    npm install -g "$module"
+npm install -g "$module"
 done
 
 # right
-modules=(json httpserver jshint)
-for module in "${modules[@]}"; do
-    npm install -g "$module"
+modules = (json httpserver jshint)
+for module in "$ {
+	modules[@]}"; do
+npm install -g "$module"
 done
 ```
 
 Of course, in this example it may be better expressed as:
 
 ``` bash
-npm install -g "${modules[@]}"
+npm install -g "$ {
+	modules[@]}"
 ```
 
 ... if the command supports multiple arguments, and you are not interested in
@@ -273,9 +281,9 @@ commands
 Example
 
 ``` bash
-fqdn='computer1.daveeddy.com'
+fqdn = 'computer1.daveeddy.com'
 
-IFS=. read -r hostname domain tld <<< "$fqdn"
+IFS = .read -r hostname domain tld <<< "$fqdn"
 echo "$hostname is in $domain.$tld"
 # => "computer1 is in daveeddy.com"
 ```
@@ -323,29 +331,29 @@ substitution interpolation, and single quotes for all others.
 
 ``` bash
 # right
-foo='Hello World'
-bar="You are $USER"
+foo = 'Hello World'
+bar = "You are $USER"
 
 # wrong
-foo="hello world"
+foo = "hello world"
 
 # possibly wrong, depending on intent
-bar='You are $USER'
+bar = 'You are $USER'
 ```
 
 All variables that will undergo word-splitting *must* be quoted (1).  If no
 splitting will happen, the variable may remain unquoted.
 
 ``` bash
-foo='hello world'
+foo = 'hello world'
 
-if [[ -n $foo ]]; then   # no quotes needed:
-                         # [[ ... ]] won't word-split variable expansions
+if [[-n $foo]]; then   # no quotes needed:
+# [[ ... ]] won't word-split variable expansions
 
-    echo "$foo"          # quotes needed
+echo "$foo"          # quotes needed
 fi
 
-bar=$foo  # no quotes needed - variable assignment doesn't word-split
+bar = $foo  # no quotes needed - variable assignment doesn't word-split
 ```
 
 1. The only exception to this rule is if the code or bash controls the variable
@@ -353,13 +361,13 @@ for the duration of its lifetime.  For instance,
 [basher](https://github.com/bahamas10/basher) has code like:
 
 ``` bash
-printf_date_supported=false
+printf_date_supported = false
 if printf '%()T' &>/dev/null; then
-    printf_date_supported=true
+printf_date_supported = true
 fi
 
 if $printf_date_supported; then
-    ...
+...
 fi
 ```
 
@@ -382,16 +390,16 @@ be used for associative arrays.  `local` should *always* be used in functions.
 
 ``` bash
 # wrong
-declare -i foo=5
+declare -i foo = 5
 let foo++
-readonly bar='something'
-FOOBAR=baz
+readonly bar = 'something'
+FOOBAR = baz
 
 # right
-i=5
+i = 5
 ((i++))
-bar='something'
-foobar=baz
+bar = 'something'
+foobar = baz
 ```
 
 ### shebang
@@ -445,7 +453,9 @@ is performed.  For example.
 
 ``` bash
 for f in '1 space' '2  spaces' '3   spaces'; do
-    echo ${f}
+echo $ {
+	f
+}
 done
 ```
 
@@ -474,7 +484,7 @@ If the variable was quoted instead:
 
 ``` bash
 for f in '1 space' '2  spaces' '3   spaces'; do
-    echo "$f"
+echo "$f"
 done
 ```
 
@@ -497,7 +507,9 @@ is expanded properly.  For example:
 ``` bash
 $ echo "$HOME is $USERs home directory"
 /home/dave is  home directory
-$ echo "$HOME is ${USER}s home directory"
+$ echo "$HOME is $ {
+	USER
+}s home directory"
 /home/dave is daves home directory
 ```
 
@@ -510,9 +522,9 @@ expanded.
 separated data is best left to a `while read -r ...` loop.
 
 ``` bash
-users=$(awk -F: '{print $1}' /etc/passwd)
+users = $(awk -F: '{print $1}' /etc/passwd)
 for user in $users; do
-    echo "user is $user"
+echo "user is $user"
 done
 ```
 
@@ -534,14 +546,14 @@ sign that something isn't implemented correctly.
 To rewrite this:
 
 ``` bash
-while IFS=: read -r user _; do
-    echo "$user is user"
+while IFS = :read -r user _; do
+echo "$user is user"
 done < /etc/passwd
 ```
 
 This will read the file in a streaming fashion, not pulling it all into memory,
-and will break on colons extracting the first field and discarding (storing as
-the variable `_`) the rest - using nothing but bash builtin commands.
+and will break on colons extracting the first field and discarding
+(storing asthe variable `_`) the rest - using nothing but bash builtin commands.
 
 Extra
 -----
